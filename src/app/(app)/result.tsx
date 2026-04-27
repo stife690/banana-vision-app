@@ -1,3 +1,7 @@
+/**
+ * src/app/(app)/result.tsx
+ */
+
 import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
 import {
@@ -12,26 +16,12 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import AnalysisSummaryCard from "../../components/AnalysisSummaryCard";
 import AppButton from "../../components/AppButton";
 import { theme } from "../../constants/theme";
-import { getAnalysisById } from "../../services/analysis.service";
-import { predictLeafMock } from "../../services/prediction.mock";
-import { AnalysisWithSignedUrl } from "../../types/database";
+import {
+  getAnalysisById,
+  mapAnalysisToPrediction,
+} from "../../services/analysis.service"; // ← FIX: todo desde analysis.service
 import { PredictionResult } from "../../types/prediction";
 import styles from "./result.styles";
-
-function mapAnalysisToPrediction(
-  analysis: AnalysisWithSignedUrl
-): PredictionResult {
-  return {
-    prediction: analysis.prediction,
-    confidence: analysis.confidence ?? 0,
-    probabilities: analysis.probabilities,
-    imageUri: analysis.signed_image_url ?? analysis.image_url ?? "",
-    gradcamUrl: analysis.gradcam_url ?? undefined,
-    gradcamBase64: undefined,
-    modelName: analysis.model_name ?? undefined,
-    createdAt: analysis.created_at,
-  };
-}
 
 export default function ResultScreen() {
   const params = useLocalSearchParams<{
@@ -48,9 +38,9 @@ export default function ResultScreen() {
     ? params.analysisId[0]
     : params.analysisId;
 
+  // Resultado precargado que viene de index.tsx via params (camino más común)
   const preloadedResult = useMemo<PredictionResult | null>(() => {
     if (!resultParam) return null;
-
     try {
       return JSON.parse(decodeURIComponent(resultParam)) as PredictionResult;
     } catch {
@@ -58,25 +48,24 @@ export default function ResultScreen() {
     }
   }, [resultParam]);
 
-  const [loading, setLoading] = useState(Boolean(analysisId) || !preloadedResult);
-  const [result, setResult] = useState<PredictionResult | null>(
-    preloadedResult
-  );
-  const [displayUri, setDisplayUri] = useState<string>(uriParam ?? preloadedResult?.imageUri ?? "");
+  const [loading, setLoading]           = useState(Boolean(analysisId) && !preloadedResult);
+  const [result, setResult]             = useState<PredictionResult | null>(preloadedResult);
+  const [displayUri, setDisplayUri]     = useState<string>(uriParam ?? preloadedResult?.imageUri ?? "");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
     const run = async () => {
+      // Caso A: viene con analysisId (desde el historial)
       if (analysisId) {
         setLoading(true);
         setErrorMessage(null);
 
         try {
           const analysis = await getAnalysisById(analysisId);
-          const mapped = mapAnalysisToPrediction(analysis);
+          const mapped   = mapAnalysisToPrediction(analysis);
 
           setResult(mapped);
-          setDisplayUri(analysis.signed_image_url ?? analysis.image_url ?? "");
+          setDisplayUri(analysis.signed_image_url ?? analysis.image_url);
         } catch (error) {
           setErrorMessage(
             error instanceof Error
@@ -86,36 +75,20 @@ export default function ResultScreen() {
         } finally {
           setLoading(false);
         }
-
         return;
       }
 
+      // Caso B: viene con resultado precargado (desde index.tsx)
       if (preloadedResult) {
         setLoading(false);
-        setErrorMessage(null);
         setResult(preloadedResult);
         setDisplayUri(uriParam ?? preloadedResult.imageUri);
         return;
       }
 
-      if (!uriParam) {
-        setLoading(false);
-        setErrorMessage("No se encontró una imagen asociada al análisis.");
-        return;
-      }
-
-      setLoading(true);
-      setErrorMessage(null);
-
-      try {
-        const data = await predictLeafMock(uriParam);
-        setResult(data);
-        setDisplayUri(uriParam);
-      } catch {
-        setErrorMessage("No se pudo generar el resultado del análisis.");
-      } finally {
-        setLoading(false);
-      }
+      // Caso C: no hay datos suficientes
+      setLoading(false);
+      setErrorMessage("No se encontraron datos para mostrar este análisis.");
     };
 
     void run();
@@ -140,27 +113,6 @@ export default function ResultScreen() {
     );
   }
 
-  if (!loading && !displayUri && !result) {
-    return (
-      <SafeAreaView style={styles.safeArea}>
-        <ScrollView contentContainerStyle={styles.scrollContent}>
-          <View style={styles.container}>
-            <View style={styles.headerCard}>
-              <Text style={styles.title}>Resultado no disponible</Text>
-              <Text style={styles.subtitle}>
-                No se encontraron datos suficientes para mostrar este análisis.
-              </Text>
-              <AppButton
-                title="Volver al inicio"
-                onPress={() => router.replace("/")}
-              />
-            </View>
-          </View>
-        </ScrollView>
-      </SafeAreaView>
-    );
-  }
-
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
@@ -169,8 +121,7 @@ export default function ResultScreen() {
             <Text style={styles.eyebrow}>RESULTADO COMPLETO</Text>
             <Text style={styles.title}>Diagnóstico de hoja de banano</Text>
             <Text style={styles.subtitle}>
-              Aquí se presenta la imagen original y el bloque completo del
-              análisis con clase, confianza, probabilidades y Grad-CAM.
+              Imagen original, clase predicha, probabilidades y mapa Grad-CAM.
             </Text>
 
             {displayUri ? (
@@ -187,10 +138,9 @@ export default function ResultScreen() {
           {loading ? (
             <View style={styles.loadingCard}>
               <ActivityIndicator size="large" color={theme.colors.primary} />
-              <Text style={styles.loadingTitle}>Generando resultado</Text>
+              <Text style={styles.loadingTitle}>Cargando análisis</Text>
               <Text style={styles.loadingText}>
-                El sistema está procesando la información para mostrar el
-                diagnóstico completo.
+                Recuperando el diagnóstico guardado en tu historial.
               </Text>
             </View>
           ) : result ? (

@@ -1,3 +1,7 @@
+/**
+ * src/components/AnalysisHistoryCard.tsx
+ */
+
 import React from "react";
 import { Image, Pressable, Text, View } from "react-native";
 
@@ -13,13 +17,11 @@ function formatConfidence(value: number | null) {
   if (value === null || Number.isNaN(value)) {
     return "Confianza no disponible";
   }
-
   return `Confianza: ${(value * 100).toFixed(1)}%`;
 }
 
 function formatDate(dateString: string) {
   const date = new Date(dateString);
-
   return date.toLocaleString("es-CO", {
     dateStyle: "medium",
     timeStyle: "short",
@@ -46,9 +48,11 @@ export default function AnalysisHistoryCard({ item, onPress }: Props) {
       <View style={styles.content}>
         <View style={styles.rowTop}>
           <Text style={styles.eyebrow}>ANÁLISIS GUARDADO</Text>
-          <Text style={styles.prediction}>{item.prediction}</Text>
+          {/* FIX: clase_predicha en lugar de prediction */}
+          <Text style={styles.prediction}>{item.clase_predicha}</Text>
+          {/* FIX: confianza en lugar de confidence */}
           <Text style={styles.confidence}>
-            {formatConfidence(item.confidence)}
+            {formatConfidence(item.confianza)}
           </Text>
         </View>
 
@@ -56,12 +60,9 @@ export default function AnalysisHistoryCard({ item, onPress }: Props) {
           <View style={styles.chip}>
             <Text style={styles.chipText}>{formatDate(item.created_at)}</Text>
           </View>
-
-          {item.model_name ? (
-            <View style={styles.chip}>
-              <Text style={styles.chipText}>{item.model_name}</Text>
-            </View>
-          ) : null}
+          <View style={styles.chip}>
+            <Text style={styles.chipText}>MobileNetV2</Text>
+          </View>
         </View>
       </View>
     </Pressable>

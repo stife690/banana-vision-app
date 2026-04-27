@@ -1,12 +1,16 @@
+/**
+ * src/app/(app)/history.tsx
+ */
+
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import { FlatList, RefreshControl, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import AppButton from "../../components/AppButton";
 import AnalysisHistoryCard from "../../components/AnalysisHistoryCard";
+import AppButton from "../../components/AppButton";
 import FloatingHomeButton from "../../components/FloatingHomeButton";
-import { listUserAnalyses } from "../../services/analysis.service";
+import { listUserAnalyses } from "../../services/analysis.service"; // ← FIX
 import { AnalysisWithSignedUrl } from "../../types/database";
 import styles from "./history.styles";
 
@@ -17,11 +21,8 @@ export default function HistoryScreen() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const loadHistory = async (mode: "initial" | "refresh" = "initial") => {
-    if (mode === "initial") {
-      setIsLoading(true);
-    } else {
-      setIsRefreshing(true);
-    }
+    if (mode === "initial") setIsLoading(true);
+    else setIsRefreshing(true);
 
     setErrorMessage(null);
 
@@ -35,11 +36,8 @@ export default function HistoryScreen() {
           : "No se pudo cargar el historial de análisis."
       );
     } finally {
-      if (mode === "initial") {
-        setIsLoading(false);
-      } else {
-        setIsRefreshing(false);
-      }
+      if (mode === "initial") setIsLoading(false);
+      else setIsRefreshing(false);
     }
   };
 
@@ -50,9 +48,7 @@ export default function HistoryScreen() {
   const handleOpenAnalysis = (analysisId: string) => {
     router.push({
       pathname: "/(app)/result",
-      params: {
-        analysisId,
-      },
+      params: { analysisId },
     });
   };
 
@@ -69,11 +65,9 @@ export default function HistoryScreen() {
         <View style={styles.chip}>
           <Text style={styles.chipText}>{items.length} registros</Text>
         </View>
-
         <View style={styles.chip}>
           <Text style={styles.chipText}>Supabase</Text>
         </View>
-
         <View style={styles.chip}>
           <Text style={styles.chipText}>Storage privado</Text>
         </View>
@@ -88,7 +82,6 @@ export default function HistoryScreen() {
         <View style={styles.listContent}>
           <View style={styles.container}>
             {renderHeader()}
-
             <View style={styles.statusCard}>
               <Text style={styles.statusTitle}>Cargando historial</Text>
               <Text style={styles.statusText}>
@@ -108,16 +101,12 @@ export default function HistoryScreen() {
         <View style={styles.listContent}>
           <View style={styles.container}>
             {renderHeader()}
-
             <View style={styles.statusCard}>
               <Text style={styles.errorTitle}>No se pudo cargar</Text>
               <Text style={styles.statusText}>{errorMessage}</Text>
-
               <AppButton
                 title="Intentar de nuevo"
-                onPress={() => {
-                  void loadHistory();
-                }}
+                onPress={() => { void loadHistory(); }}
               />
             </View>
           </View>
@@ -136,9 +125,7 @@ export default function HistoryScreen() {
         refreshControl={
           <RefreshControl
             refreshing={isRefreshing}
-            onRefresh={() => {
-              void loadHistory("refresh");
-            }}
+            onRefresh={() => { void loadHistory("refresh"); }}
           />
         }
         ListHeaderComponent={
@@ -152,12 +139,9 @@ export default function HistoryScreen() {
                 Cuando captures o subas una imagen y el análisis se guarde en
                 Supabase, aparecerá aquí automáticamente.
               </Text>
-
               <AppButton
                 title="Actualizar historial"
-                onPress={() => {
-                  void loadHistory();
-                }}
+                onPress={() => { void loadHistory(); }}
               />
             </View>
           </View>
