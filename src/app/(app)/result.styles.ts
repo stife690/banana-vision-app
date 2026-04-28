@@ -54,9 +54,10 @@ const styles = StyleSheet.create({
     borderColor: theme.colors.border,
     backgroundColor: "#EEF4ED",
   },
+  // ── Imagen principal: proporción 4:3, sin recorte ────────────────────
   image: {
     width: "100%",
-    height: 360,
+    aspectRatio: 4 / 3,
   },
   loadingCard: {
     backgroundColor: theme.colors.surface,
@@ -89,5 +90,5 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
 });
-
+ 
 export default styles;

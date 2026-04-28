@@ -121,9 +121,10 @@ const styles = StyleSheet.create({
     borderColor: theme.colors.border,
     backgroundColor: "#EEF4ED",
   },
+  // ── Imagen seleccionada: proporción 4:3, sin recorte ─────────────────
   selectedImage: {
     width: "100%",
-    height: 280,
+    aspectRatio: 4 / 3,
   },
   imageMetaRow: {
     flexDirection: "row",

@@ -104,9 +104,10 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     marginTop: 6,
   },
+  // ── Grad-CAM: proporción cuadrada, sin recorte ───────────────────────
   gradcamImage: {
     width: "100%",
-    height: 240,
+    aspectRatio: 1,
     backgroundColor: "#EEF4ED",
   },
   gradcamPlaceholder: {
@@ -131,4 +132,5 @@ const styles = StyleSheet.create({
     marginTop: 16,
   },
 });
+
 export default styles;

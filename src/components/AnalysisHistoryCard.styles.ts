@@ -15,14 +15,15 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 8 },
     elevation: 2,
   },
+  // ── Imagen: proporción fija, sin recorte ─────────────────────────────
   image: {
     width: "100%",
-    height: 180,
+    aspectRatio: 4 / 3,
     backgroundColor: "#EEF4ED",
   },
   placeholder: {
     width: "100%",
-    height: 180,
+    aspectRatio: 4 / 3,
     backgroundColor: "#EEF4ED",
     alignItems: "center",
     justifyContent: "center",
